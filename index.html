@@ -802,7 +802,7 @@ function saveConfig(){
 
 function startAuth(){
   if(!cfg.clientId){ toast('Configura prima il Client ID','error'); return; }
-  const redirectUri = 'https://prof-antonioguida.github.io/archiviodeglialunni/';
+  const redirectUri = 'https://prof-antonioguida.github.io/archiviodeglialunni';
   const scope = encodeURIComponent('https://www.googleapis.com/auth/drive');
   const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${cfg.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}&prompt=select_account`;
   location.href = url;
