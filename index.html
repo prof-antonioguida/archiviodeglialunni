@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FileShare – Google Drive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f5f4f0;
+  --surface:#ffffff;
+  --surface2:#f0efe9;
+  --surface3:#e8e7e0;
+  --border:#dddbd2;
+  --border2:#c8c6bb;
+  --ink:#1a1916;
+  --ink2:#5a5850;
+  --ink3:#9a9890;
+  --accent:#2a5cff;
+  --accent-light:#e8eeff;
+  --accent-dark:#1a3fcc;
+  --red:#e03030;
+  --red-light:#fdeaea;
+  --green:#1a8a4a;
+  --green-light:#e6f5ed;
+  --amber:#b06000;
+  --amber-light:#fff3e0;
+  --font-head:'Syne',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --r:10px;
+  --r2:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
+  --shadow-md:0 2px 8px rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.06);
+}
+
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* ── SETUP SCREEN ── */
+#setup-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:var(--bg);
+}
+.setup-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:40px;
+  width:100%;max-width:560px;
+  box-shadow:var(--shadow-md);
+}
+.setup-logo{
+  display:flex;align-items:center;gap:12px;margin-bottom:32px;
+}
+.setup-logo-icon{
+  width:44px;height:44px;background:var(--accent);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.setup-logo-icon svg{width:24px;height:24px;fill:white;}
+.setup-logo-text{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--ink);}
+.setup-logo-sub{font-size:12px;color:var(--ink3);}
+
+.setup-step{
+  display:none;
+}
+.setup-step.active{display:block;}
+
+.step-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--accent-light);color:var(--accent);
+  font-size:11px;font-weight:600;letter-spacing:.5px;
+  padding:4px 10px;border-radius:20px;margin-bottom:12px;
+  font-family:var(--font-head);text-transform:uppercase;
+}
+.step-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:8px;}
+.step-desc{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:24px;}
+
+.instruction-box{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;margin-bottom:16px;
+}
+.instruction-step{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.instruction-step:last-child{border-bottom:none;padding-bottom:0;}
+.instruction-step:first-child{padding-top:0;}
+.step-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--accent);color:white;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+  font-family:var(--font-head);
+}
+.step-text{font-size:13px;color:var(--ink2);line-height:1.6;}
+.step-text strong{color:var(--ink);font-weight:500;}
+.step-text a{color:var(--accent);text-decoration:none;}
+.step-text a:hover{text-decoration:underline;}
+.step-text code{
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:4px;padding:1px 6px;font-size:11px;
+  font-family:monospace;color:var(--ink);
+  user-select:all;
+}
+
+.field-group{margin-bottom:16px;}
+.field-label{font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:6px;display:block;font-family:var(--font-head);}
+.field-input{
+  width:100%;padding:10px 14px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:var(--r2);
+  color:var(--ink);font-family:var(--font-body);font-size:13px;
+  outline:none;transition:border .15s;
+}
+.field-input:focus{border-color:var(--accent);}
+.field-input::placeholder{color:var(--ink3);}
+
+.field-hint{font-size:11px;color:var(--ink3);margin-top:5px;line-height:1.5;}
+
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:24px;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 18px;border-radius:8px;
+  border:1px solid var(--border2);
+  background:var(--surface);color:var(--ink);
+  cursor:pointer;font-family:var(--font-head);
+  font-size:13px;font-weight:600;
+  transition:all .15s;white-space:nowrap;
+}
+.btn:hover{background:var(--surface2);}
+.btn svg{width:15px;height:15px;flex-shrink:0;}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:white;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-danger{background:var(--red-light);border-color:rgba(224,48,48,.25);color:var(--red);}
+.btn-danger:hover{background:#fad5d5;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+
+.oauth-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:12px;
+  background:white;border:1px solid var(--border2);
+  border-radius:var(--r);cursor:pointer;
+  font-family:var(--font-body);font-size:14px;font-weight:500;
+  color:var(--ink);transition:all .15s;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+.oauth-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+
+.status-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  margin-top:12px;
+}
+.status-ok{background:var(--green-light);color:var(--green);}
+.status-err{background:var(--red-light);color:var(--red);}
+.status-wait{background:var(--amber-light);color:var(--amber);}
+
+/* ── MAIN APP ── */
+#app{display:none;flex-direction:column;min-height:100vh;}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:56px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  gap:12px;
+  box-shadow:0 1px 0 var(--border);
+}
+.logo{
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+  font-family:var(--font-head);font-size:17px;font-weight:700;
+}
+.logo-icon{
+  width:30px;height:30px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.logo-icon svg{width:17px;height:17px;fill:white;}
+
+.tab-group{
+  display:flex;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px;
+}
+.tab-btn{
+  padding:5px 16px;border:none;background:transparent;
+  color:var(--ink2);border-radius:6px;cursor:pointer;
+  font-family:var(--font-head);font-size:13px;font-weight:600;
+  transition:all .15s;white-space:nowrap;
+}
+.tab-btn.active{background:var(--accent);color:white;}
+.tab-btn:hover:not(.active){background:var(--surface3);}
+
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.icon-btn{
+  width:34px;height:34px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink2);transition:all .15s;flex-shrink:0;
+}
+.icon-btn:hover{background:var(--surface3);color:var(--ink);}
+.icon-btn svg{width:16px;height:16px;}
+
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 10px 4px 4px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:20px;
+}
+.user-avatar{
+  width:26px;height:26px;border-radius:50%;overflow:hidden;
+  background:var(--accent-light);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--accent);font-family:var(--font-head);
+}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+.user-name{font-size:12px;font-weight:500;color:var(--ink2);}
+
+/* TOOLBAR */
+.toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 24px;background:var(--surface);
+  border-bottom:1px solid var(--border);flex-wrap:wrap;
+}
+.breadcrumb{display:flex;align-items:center;gap:4px;flex:1;min-width:0;font-size:13px;}
+.bc-item{
+  color:var(--ink2);cursor:pointer;padding:3px 7px;
+  border-radius:5px;white-space:nowrap;transition:all .12s;
+  font-family:var(--font-head);font-weight:500;
+}
+.bc-item:hover{color:var(--ink);background:var(--surface2);}
+.bc-item.active{color:var(--ink);}
+.bc-sep{color:var(--ink3);font-size:12px;}
+.toolbar-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+
+/* SORT BAR */
+.sort-bar{
+  display:flex;align-items:center;gap:4px;
+  padding:7px 24px;border-bottom:1px solid var(--border);
+  background:var(--bg);font-size:12px;color:var(--ink3);flex-wrap:wrap;
+}
+.sort-lbl{margin-right:6px;font-family:var(--font-head);font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.sort-btn{
+  padding:3px 10px;border-radius:5px;border:1px solid transparent;
+  background:transparent;color:var(--ink2);cursor:pointer;
+  font-family:var(--font-head);font-size:11px;font-weight:600;
+  transition:all .12s;display:flex;align-items:center;gap:4px;
+}
+.sort-btn:hover{background:var(--surface);border-color:var(--border);}
+.sort-btn.active{background:var(--accent-light);border-color:rgba(42,92,255,.3);color:var(--accent);}
+
+/* FILES */
+.content-area{display:flex;flex:1;}
+.files-area{flex:1;padding:20px 24px;overflow-y:auto;}
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.files-list{display:flex;flex-direction:column;gap:2px;}
+
+.file-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 14px;
+  cursor:pointer;transition:all .15s;
+  box-shadow:var(--shadow);
+}
+.file-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:var(--shadow-md);}
+.file-card.selected{border-color:var(--accent);background:var(--accent-light);}
+
+.file-icon{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:10px;
+}
+.file-icon svg{width:22px;height:22px;}
+.fi-folder{background:#fff3e0;} .fi-folder svg{fill:#e65100;}
+.fi-pdf{background:#fdeaea;} .fi-pdf svg{fill:#c62828;}
+.fi-img{background:#e8f5e9;} .fi-img svg{fill:#2e7d32;}
+.fi-doc{background:#e3f2fd;} .fi-doc svg{fill:#1565c0;}
+.fi-sheet{background:#e8f5e9;} .fi-sheet svg{fill:#1b5e20;}
+.fi-slide{background:#fff8e1;} .fi-slide svg{fill:#e65100;}
+.fi-video{background:#fce4ec;} .fi-video svg{fill:#880e4f;}
+.fi-audio{background:#f3e5f5;} .fi-audio svg{fill:#6a1b9a;}
+.fi-archive{background:#e0f2f1;} .fi-archive svg{fill:#004d40;}
+.fi-other{background:var(--surface2);} .fi-other svg{fill:var(--ink3);}
+
+.file-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-head);}
+.file-meta{font-size:11px;color:var(--ink3);margin-top:3px;}
+
+.file-row{
+  display:flex;align-items:center;gap:12px;
+  padding:9px 12px;border-radius:8px;cursor:pointer;
+  transition:all .12s;border:1px solid transparent;
+}
+.file-row:hover{background:var(--surface);border-color:var(--border);}
+.file-row.selected{background:var(--accent-light);border-color:rgba(42,92,255,.25);}
+.file-row .file-icon{margin-bottom:0;width:34px;height:34px;flex-shrink:0;}
+.file-row .file-icon svg{width:17px;height:17px;}
+.file-row-info{flex:1;min-width:0;}
+.file-row-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-head);}
+.file-row-meta{font-size:11px;color:var(--ink3);}
+.row-actions{display:flex;gap:4px;opacity:0;transition:opacity .12s;}
+.file-row:hover .row-actions{opacity:1;}
+.row-actions .icon-btn{width:28px;height:28px;border-radius:6px;}
+
+/* DETAIL PANEL */
+.detail-panel{
+  width:230px;flex-shrink:0;background:var(--surface);
+  border-left:1px solid var(--border);padding:20px 16px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.dp-icon{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;}
+.dp-icon svg{width:30px;height:30px;}
+.dp-name{font-family:var(--font-head);font-size:14px;font-weight:700;word-break:break-all;}
+.dp-prop{display:flex;flex-direction:column;gap:3px;}
+.dp-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px;font-family:var(--font-head);font-weight:600;}
+.dp-val{font-size:12px;color:var(--ink);}
+.dp-actions{display:flex;flex-direction:column;gap:6px;margin-top:auto;}
+.dp-actions .btn{width:100%;justify-content:center;}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center;color:var(--ink3);gap:14px;}
+.empty svg{width:52px;height:52px;opacity:.25;}
+.empty-title{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--ink2);}
+.empty-sub{font-size:13px;}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--ink2);}
+
+/* MODALS */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(20,20,16,.55);
+  backdrop-filter:blur(6px);display:flex;align-items:center;
+  justify-content:center;z-index:200;padding:20px;
+}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px;width:100%;max-width:420px;
+  position:relative;box-shadow:var(--shadow-md);
+}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--ink2);margin-bottom:20px;}
+.modal-close{
+  position:absolute;top:16px;right:16px;width:28px;height:28px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--ink2);transition:all .12s;
+}
+.modal-close:hover{background:var(--surface3);color:var(--ink);}
+.modal-close svg{width:14px;height:14px;}
+.modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
+
+/* UPLOAD ZONE */
+.upload-zone{
+  border:2px dashed var(--border2);border-radius:var(--r);
+  padding:32px 20px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--surface2);margin-bottom:12px;
+}
+.upload-zone:hover,.upload-zone.dragging{border-color:var(--accent);background:var(--accent-light);}
+.upload-zone svg{width:34px;height:34px;fill:var(--ink3);margin-bottom:10px;}
+.upload-zone.dragging svg{fill:var(--accent);}
+.upload-zone p{font-size:13px;color:var(--ink2);font-weight:500;}
+.upload-zone span{font-size:11px;color:var(--ink3);}
+.upload-file-list{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-top:8px;}
+.ufi{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:6px;font-size:12px;color:var(--ink2);}
+.ufi .rm{margin-left:auto;cursor:pointer;color:var(--ink3);width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:4px;}
+.ufi .rm:hover{background:var(--red-light);color:var(--red);}
+.ufi .rm svg{width:12px;height:12px;}
+
+/* PROGRESS */
+.progress-wrap{margin-top:10px;display:none;}
+.progress-label{font-size:12px;color:var(--ink2);margin-bottom:5px;}
+.progress-bar{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;width:0%;}
+
+/* SHARE BOX */
+.share-box{
+  background:var(--accent-light);border:1px solid rgba(42,92,255,.2);
+  border-radius:var(--r);padding:14px 16px;
+}
+.share-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;font-family:var(--font-head);margin-bottom:6px;}
+.share-desc{font-size:12px;color:var(--ink2);margin-bottom:10px;}
+.share-row{display:flex;gap:6px;align-items:center;}
+.share-input{
+  flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border2);
+  border-radius:6px;color:var(--ink2);font-family:monospace;font-size:11px;outline:none;
+}
+
+/* TOAST */
+.toast-area{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  padding:10px 16px;border-radius:9px;font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:8px;max-width:300px;
+  box-shadow:var(--shadow-md);animation:slideIn .2s ease;
+}
+.toast svg{width:14px;height:14px;flex-shrink:0;}
+.toast.success{background:var(--green-light);border:1px solid rgba(26,138,74,.3);color:var(--green);}
+.toast.error{background:var(--red-light);border:1px solid rgba(224,48,48,.3);color:var(--red);}
+.toast.info{background:var(--accent-light);border:1px solid rgba(42,92,255,.3);color:var(--accent);}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* EMBED MODAL */
+.embed-code{
+  width:100%;height:80px;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;padding:10px;color:var(--ink2);font-family:monospace;
+  font-size:11px;resize:none;outline:none;line-height:1.6;
+}
+
+/* VIEW BTNS */
+.view-btns{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:2px;gap:1px;}
+.view-btn{width:28px;height:26px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--ink3);border-radius:5px;cursor:pointer;transition:all .12s;}
+.view-btn.active{background:var(--surface3);color:var(--ink);}
+.view-btn svg{width:13px;height:13px;}
+
+/* USER VIEW HEADER */
+.user-header{background:var(--surface);border-bottom:1px solid var(--border);padding:24px;text-align:center;}
+.user-header h1{font-family:var(--font-head);font-size:22px;font-weight:700;}
+.user-header p{font-size:13px;color:var(--ink2);margin-top:4px;}
+.drive-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;padding:4px 12px;font-size:11px;
+  color:var(--ink2);margin-top:8px;
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .topbar{padding:0 14px;height:50px;}
+  .toolbar{padding:8px 14px;}
+  .files-area{padding:14px;}
+  .sort-bar{padding:6px 14px;}
+  .files-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+  .btn span{display:none;}
+  .btn{padding:7px 10px;}
+  .detail-panel{display:none;}
+  .setup-card{padding:24px;}
+}
+@media(orientation:landscape) and (max-height:500px){
+  .topbar{height:44px;}
+  .files-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
+  .user-header{padding:12px;}
+}
+
+.hidden{display:none!important;}
+.drive-syncing{color:var(--amber);font-size:12px;display:flex;align-items:center;gap:5px;}
+.drive-syncing svg{width:12px;height:12px;animation:spin .7s linear infinite;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SETUP SCREEN ══════════════ -->
+<div id="setup-screen">
+<div class="setup-card">
+  <div class="setup-logo">
+    <div class="setup-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 012-2h5l2 2h7a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6z"/></svg>
+    </div>
+    <div>
+      <div class="setup-logo-text">FileShare</div>
+      <div class="setup-logo-sub">con Google Drive</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Crea progetto Google Cloud -->
+  <div class="setup-step active" id="step-1">
+    <div class="step-badge">Configurazione · Passo 1 di 3</div>
+    <div class="step-title">Crea il progetto Google Cloud</div>
+    <div class="step-desc">Per connettere l'app a Google Drive hai bisogno di credenziali API. Segui questi passaggi (una volta sola, richiede ~5 minuti).</div>
+    <div class="instruction-box">
+      <div class="instruction-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Vai su <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> e accedi con il tuo account Google.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Crea un nuovo progetto: clicca sul selettore in alto → <strong>"Nuovo progetto"</strong> → dai un nome (es. <code>fileshare-drive</code>) → <strong>Crea</strong>.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Nel menu a sinistra vai su <strong>API e servizi → Libreria</strong>. Cerca <strong>"Google Drive API"</strong> e abilitala.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Vai su <strong>API e servizi → Credenziali → Crea credenziali → ID client OAuth 2.0</strong>. Tipo applicazione: <strong>Applicazione web</strong>.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">5</div>
+        <div class="step-text">In <strong>"URI di reindirizzamento autorizzati"</strong> aggiungi l'URL di questa pagina (es. <code id="current-origin-hint"></code>). Poi clicca <strong>Crea</strong>.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">6</div>
+        <div class="step-text">Vai su <strong>API e servizi → Schermata consenso OAuth</strong>. Tipo: <strong>Esterno</strong>. Compila nome app e email. In <strong>"Utenti di test"</strong> aggiungi la tua email Google. Salva.</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="goStep(2)">Ho completato → <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg></button></div>
+  </div>
+
+  <!-- STEP 2: Inserisci credenziali -->
+  <div class="setup-step" id="step-2">
+    <div class="step-badge">Configurazione · Passo 2 di 3</div>
+    <div class="step-title">Inserisci le credenziali</div>
+    <div class="step-desc">Copia e incolla le informazioni che trovi nella pagina delle credenziali Google Cloud.</div>
+    <div class="field-group">
+      <label class="field-label">Client ID</label>
+      <input class="field-input" type="text" id="cfg-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+      <div class="field-hint">Trovalo in Credenziali → il tuo client OAuth → "ID client"</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">ID cartella Google Drive (opzionale)</label>
+      <input class="field-input" type="text" id="cfg-folder-id" placeholder="Lascia vuoto per usare la radice di Drive">
+      <div class="field-hint">Apri la cartella su drive.google.com → l'ID è nella URL: <code>drive.google.com/drive/folders/<strong>QUESTO_ID</strong></code>. Se vuoi usare il root di Drive, lascia vuoto.</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Nome della cartella condivisa (visualizzato agli utenti)</label>
+      <input class="field-input" type="text" id="cfg-folder-name" placeholder="Es. Documenti pubblici" value="Cartella condivisa">
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(1)">← Indietro</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Salva e accedi con Google →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Accedi -->
+  <div class="setup-step" id="step-3">
+    <div class="step-badge">Configurazione · Passo 3 di 3</div>
+    <div class="step-title">Accedi con Google</div>
+    <div class="step-desc">Autorizza l'app ad accedere a Google Drive. Verrai reindirizzato alla schermata di login Google.</div>
+    <div id="auth-status"></div>
+    <div style="margin-top:20px;">
+      <button class="oauth-btn" onclick="startAuth()">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Accedi con Google
+      </button>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--ink3);line-height:1.6;">
+      L'app richiede solo le autorizzazioni per leggere e modificare i file di Google Drive. Le tue credenziali non vengono mai inviate a server di terze parti — tutto avviene direttamente tra il tuo browser e Google.
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 012-2h5l2 2h7a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6z"/></svg></div>
+      FileShare
+    </div>
+    <div class="tab-group">
+      <button class="tab-btn active" onclick="switchTab('manager')">Gestore</button>
+      <button class="tab-btn" onclick="switchTab('user')">Vista Utente</button>
+    </div>
+    <div class="topbar-right">
+      <div id="sync-indicator" class="drive-syncing hidden">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/></svg>
+        Sincronizzazione...
+      </div>
+      <div class="user-chip" id="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-name" id="user-name">Caricamento...</div>
+      </div>
+      <div class="icon-btn" title="Esci" onclick="signOut()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGER VIEW -->
+  <div id="manager-view" style="display:flex;flex-direction:column;flex:1;">
+    <div class="toolbar">
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <div class="toolbar-actions">
+        <button class="btn btn-primary" onclick="showUploadModal()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/></svg>
+          <span>Carica</span>
+        </button>
+        <button class="btn" onclick="showNewFolderModal()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+          <span>Nuova cartella</span>
+        </button>
+        <button class="btn btn-danger hidden" id="delete-btn" onclick="deleteSelected()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/></svg>
+          <span>Elimina</span>
+        </button>
+        <div class="view-btns">
+          <button class="view-btn active" id="grid-btn" onclick="setViewMode('grid')" title="Griglia">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          </button>
+          <button class="view-btn" id="list-btn" onclick="setViewMode('list')" title="Lista">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="sort-bar">
+      <span class="sort-lbl">Ordina:</span>
+      <button class="sort-btn active" id="sort-name" onclick="setSort('name')">Nome <span id="sort-name-i">↑</span></button>
+      <button class="sort-btn" id="sort-type" onclick="setSort('type')">Tipo <span id="sort-type-i"></span></button>
+      <button class="sort-btn" id="sort-date" onclick="setSort('date')">Data modifica <span id="sort-date-i"></span></button>
+    </div>
+    <div class="content-area">
+      <div class="files-area" id="files-area"></div>
+      <div class="detail-panel hidden" id="detail-panel"></div>
+    </div>
+    <!-- SHARE BOX -->
+    <div style="padding:12px 24px;border-top:1px solid var(--border);background:var(--surface);">
+      <div class="share-box">
+        <div class="share-label">Link condivisione</div>
+        <div class="share-desc">Questo link dà accesso in sola lettura alla cartella. Incorporalo nel tuo sito con il codice Embed.</div>
+        <div class="share-row">
+          <input class="share-input" readonly id="share-link-input" value="">
+          <button class="btn btn-primary btn-sm" onclick="copyShareLink()">Copia link</button>
+          <button class="btn btn-sm" onclick="openEmbedModal()">Embed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER VIEW -->
+  <div id="user-view" class="hidden" style="display:flex;flex-direction:column;flex:1;">
+    <div class="user-header">
+      <h1 id="user-folder-title">Cartella condivisa</h1>
+      <p id="user-folder-count">Caricamento...</p>
+      <div class="drive-badge">
+        <svg width="14" height="14" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+        Sincronizzato con Google Drive
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="breadcrumb" id="user-breadcrumb"></div>
+      <div class="toolbar-actions">
+        <button class="btn btn-primary" onclick="showUserUploadModal()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/></svg>
+          <span>Carica file</span>
+        </button>
+        <div class="view-btns">
+          <button class="view-btn active" id="u-grid-btn" onclick="setUserViewMode('grid')">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          </button>
+          <button class="view-btn" id="u-list-btn" onclick="setUserViewMode('list')">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="sort-bar">
+      <span class="sort-lbl">Ordina:</span>
+      <button class="sort-btn active" id="u-sort-name" onclick="setUserSort('name')">Nome <span id="u-sort-name-i">↑</span></button>
+      <button class="sort-btn" id="u-sort-type" onclick="setUserSort('type')">Tipo <span id="u-sort-type-i"></span></button>
+      <button class="sort-btn" id="u-sort-date" onclick="setUserSort('date')">Data modifica <span id="u-sort-date-i"></span></button>
+    </div>
+    <div class="files-area" id="user-files-area"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg hidden" id="upload-modal">
+  <div class="modal">
+    <div class="modal-title">Carica file su Drive</div>
+    <div class="modal-sub">I file verranno caricati direttamente su Google Drive.</div>
+    <div class="modal-close" onclick="closeModal('upload-modal')"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></div>
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/></svg>
+      <p>Trascina file qui o clicca per sfogliare</p>
+      <span>Qualsiasi tipo di file · Nessun limite pratico di dimensione</span>
+    </div>
+    <input type="file" id="file-input" multiple style="display:none" onchange="handleFileSelect(event)">
+    <div class="upload-file-list" id="upload-file-list"></div>
+    <div class="progress-wrap" id="upload-progress">
+      <div class="progress-label" id="progress-text">Caricamento...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('upload-modal')">Annulla</button>
+      <button class="btn btn-primary" onclick="uploadFiles()">Carica su Drive</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="folder-modal">
+  <div class="modal">
+    <div class="modal-title">Nuova cartella</div>
+    <div class="modal-sub">Verrà creata su Google Drive nella posizione attuale.</div>
+    <div class="modal-close" onclick="closeModal('folder-modal')"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></div>
+    <input class="field-input" type="text" id="folder-name-input" placeholder="Nome cartella" onkeydown="if(event.key==='Enter')createFolder()">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('folder-modal')">Annulla</button>
+      <button class="btn btn-primary" onclick="createFolder()">Crea su Drive</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="embed-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-title">Codice embed per il tuo sito</div>
+    <div class="modal-sub">Incolla questo codice HTML nel tuo sito per mostrare la cartella ai tuoi visitatori.</div>
+    <div class="modal-close" onclick="closeModal('embed-modal')"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></div>
+    <textarea class="embed-code" id="embed-code" readonly></textarea>
+    <div style="font-size:12px;color:var(--ink3);margin-top:8px;">Nota: per usare questo link gli utenti devono poter accedere alla cartella Drive. Assicurati che la cartella su Google Drive sia condivisa come "Chiunque abbia il link".</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copyEmbed()">Copia codice</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="user-upload-modal">
+  <div class="modal">
+    <div class="modal-title">Carica file</div>
+    <div class="modal-sub" id="user-upload-modal-sub">I file verranno caricati nella cartella corrente su Google Drive.</div>
+    <div class="modal-close" onclick="closeModal('user-upload-modal')"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></div>
+    <div class="upload-zone" id="user-drop-zone" onclick="document.getElementById('user-file-input').click()" ondrop="handleUserDrop(event)" ondragover="handleUserDragOver(event)" ondragleave="handleUserDragLeave(event)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/></svg>
+      <p>Trascina file qui o clicca per sfogliare</p>
+      <span>Qualsiasi tipo di file · Nessun limite pratico di dimensione</span>
+    </div>
+    <input type="file" id="user-file-input" multiple style="display:none" onchange="handleUserFileSelect(event)">
+    <div class="upload-file-list" id="user-upload-file-list"></div>
+    <div class="progress-wrap" id="user-upload-progress">
+      <div class="progress-label" id="user-progress-text">Caricamento...</div>
+      <div class="progress-bar"><div class="progress-fill" id="user-progress-fill"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('user-upload-modal')">Annulla</button>
+      <button class="btn btn-primary" onclick="userUploadFiles()">Carica su Drive</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-area" id="toast-area"></div>
+
+<!-- Google Identity / GAPI -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+<script>
+// ══════════════════════════════════════════
+//  CONFIG & STATE
+// ══════════════════════════════════════════
+const CFG_KEY = 'fileshare_cfg_v1';
+let cfg = {};
+let accessToken = null;
+let currentFolderId = null;
+let folderStack = []; // [{id, name}]
+let userFolderStack = [];
+let driveItems = [];
+let selectedId = null;
+let sortKey = 'name', sortDir = 1;
+let viewMode = 'grid';
+let userSortKey = 'name', userSortDir = 1;
+let userViewMode = 'grid';
+let pendingFiles = [];
+
+function loadCfg(){
+  try{ cfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); }catch(e){ cfg={}; }
+}
+function saveCfg(){
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+}
+
+// ══════════════════════════════════════════
+//  SETUP FLOW
+// ══════════════════════════════════════════
+function init(){
+  loadCfg();
+  document.getElementById('current-origin-hint').textContent = location.href.split('?')[0];
+  // Check URL params for OAuth callback
+  const params = new URLSearchParams(location.hash.replace('#','?').replace('?',''));
+  const urlToken = params.get('access_token');
+  if(urlToken && cfg.clientId){
+    accessToken = urlToken;
+    history.replaceState(null,'',location.pathname);
+    launchApp();
+    return;
+  }
+  if(cfg.clientId){
+    goStep(3);
+  }
+}
+
+function goStep(n){
+  document.querySelectorAll('.setup-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+}
+
+function saveConfig(){
+  const cid = document.getElementById('cfg-client-id').value.trim();
+  const fid = document.getElementById('cfg-folder-id').value.trim();
+  const fname = document.getElementById('cfg-folder-name').value.trim() || 'Cartella condivisa';
+  if(!cid){ toast('Inserisci il Client ID','error'); return; }
+  cfg = { clientId: cid, folderId: fid || 'root', folderName: fname };
+  saveCfg();
+  goStep(3);
+}
+
+function startAuth(){
+  if(!cfg.clientId){ toast('Configura prima il Client ID','error'); return; }
+  const redirectUri = location.href.split('?')[0].split('#')[0];
+  const scope = encodeURIComponent('https://www.googleapis.com/auth/drive');
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${cfg.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}&prompt=select_account`;
+  location.href = url;
+}
+
+function signOut(){
+  accessToken = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  goStep(3);
+}
+
+// ══════════════════════════════════════════
+//  DRIVE API
+// ══════════════════════════════════════════
+async function driveReq(path, opts={}){
+  const res = await fetch('https://www.googleapis.com/drive/v3/'+path, {
+    ...opts,
+    headers: { 'Authorization':'Bearer '+accessToken, ...(opts.headers||{}) }
+  });
+  if(res.status === 401){ toast('Sessione scaduta. Rieffettua il login.','error'); signOut(); throw new Error('401'); }
+  return res;
+}
+
+async function listFiles(folderId){
+  showSyncing(true);
+  try{
+    const q = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+    const fields = encodeURIComponent('files(id,name,mimeType,size,modifiedTime,webViewLink,webContentLink)');
+    const res = await driveReq(`files?q=${q}&fields=${fields}&orderBy=folder,name&pageSize=1000`);
+    const data = await res.json();
+    return data.files || [];
+  }finally{
+    showSyncing(false);
+  }
+}
+
+async function uploadToDrive(file, parentId, onProgress){
+  const meta = { name: file.name, parents: [parentId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)],{type:'application/json'}));
+  form.append('file', file);
+  return new Promise((resolve,reject)=>{
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST','https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,modifiedTime,webViewLink,webContentLink');
+    xhr.setRequestHeader('Authorization','Bearer '+accessToken);
+    xhr.upload.onprogress = e=>{ if(e.lengthComputable) onProgress(e.loaded/e.total); };
+    xhr.onload = ()=>{ if(xhr.status<300) resolve(JSON.parse(xhr.responseText)); else reject(xhr.responseText); };
+    xhr.onerror = reject;
+    xhr.send(form);
+  });
+}
+
+async function createDriveFolder(name, parentId){
+  const res = await driveReq('files', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name, mimeType:'application/vnd.google-apps.folder', parents:[parentId] })
+  });
+  return res.json();
+}
+
+async function deleteDriveItem(id){
+  await driveReq(`files/${id}`, { method:'DELETE' });
+}
+
+// ══════════════════════════════════════════
+//  APP LAUNCH
+// ══════════════════════════════════════════
+async function launchApp(){
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  // Fetch user info
+  try{
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{'Authorization':'Bearer '+accessToken}});
+    const u = await res.json();
+    const chip = document.getElementById('user-chip');
+    const av = document.getElementById('user-avatar');
+    document.getElementById('user-name').textContent = u.name || u.email || 'Utente';
+    if(u.picture){ av.innerHTML=`<img src="${u.picture}" alt="">`; }
+    else{ av.textContent=(u.name||'?')[0].toUpperCase(); }
+  }catch(e){}
+  // Navigate to configured folder
+  currentFolderId = cfg.folderId || 'root';
+  folderStack = [{ id: currentFolderId, name: cfg.folderName || 'Cartella condivisa' }];
+  userFolderStack = [...folderStack];
+  updateShareLink();
+  await loadFolder('manager');
+}
+
+async function loadFolder(side){
+  const fid = side==='manager' ? currentFolderId : userFolderStack[userFolderStack.length-1].id;
+  const area = document.getElementById(side==='manager' ? 'files-area' : 'user-files-area');
+  area.innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">Caricamento da Google Drive...</div></div>`;
+  try{
+    const items = await listFiles(fid);
+    if(side==='manager'){ driveItems = items; renderFiles(); }
+    else{ renderUserFiles(items); }
+  }catch(e){
+    area.innerHTML = `<div class="empty"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/></svg><div class="empty-title">Errore caricamento</div><div class="empty-sub">${e.message}</div></div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+//  FILE ICONS & TYPES
+// ══════════════════════════════════════════
+const ICONS = {
+  folder:`<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>`,
+  pdf:`<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>`,
+  img:`<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/></svg>`,
+  doc:`<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"/></svg>`,
+  sheet:`<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 5a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h4a1 1 0 110 2H7a1 1 0 01-1-1z"/></svg>`,
+  video:`<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/></svg>`,
+  audio:`<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z"/></svg>`,
+  archive:`<svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"/><path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/></svg>`,
+  other:`<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>`
+};
+
+function getFileClass(mime, name){
+  if(mime === 'application/vnd.google-apps.folder') return 'folder';
+  if(mime === 'application/pdf') return 'pdf';
+  if(mime.startsWith('image/')) return 'img';
+  if(mime.startsWith('video/')) return 'video';
+  if(mime.startsWith('audio/')) return 'audio';
+  if(['application/vnd.google-apps.document','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'].includes(mime)) return 'doc';
+  if(['application/vnd.google-apps.spreadsheet','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(mime)) return 'sheet';
+  if(['application/zip','application/x-rar-compressed','application/x-7z-compressed','application/x-tar'].includes(mime)) return 'archive';
+  const ext = (name||'').split('.').pop().toLowerCase();
+  if(['doc','docx','txt','odt','rtf','md'].includes(ext)) return 'doc';
+  if(['xls','xlsx','csv','ods'].includes(ext)) return 'sheet';
+  if(['zip','rar','7z','tar','gz'].includes(ext)) return 'archive';
+  return 'other';
+}
+
+function getIconClass(fc){ return 'fi-'+fc; }
+
+// ══════════════════════════════════════════
+//  RENDER - MANAGER
+// ══════════════════════════════════════════
+function sortItems(items, sk, sd){
+  return [...items].sort((a,b)=>{
+    const af = a.mimeType==='application/vnd.google-apps.folder';
+    const bf = b.mimeType==='application/vnd.google-apps.folder';
+    if(sk==='type'){
+      if(af!==bf) return (af?-1:1)*sd;
+      return a.name.localeCompare(b.name)*sd;
+    }
+    if(sk==='date') return (new Date(b.modifiedTime)-new Date(a.modifiedTime))*sd;
+    // Default: folders first, then name
+    if(af!==bf) return af?-1:1;
+    return a.name.localeCompare(b.name)*sd;
+  });
+}
+
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtSize(b){
+  if(!b) return '';
+  b=parseInt(b);
+  if(b<1024) return b+'B';
+  if(b<1048576) return (b/1024).toFixed(1)+'KB';
+  if(b<1073741824) return (b/1048576).toFixed(1)+'MB';
+  return (b/1073741824).toFixed(1)+'GB';
+}
+
+function renderBreadcrumb(stack, elId, navFn){
+  const el = document.getElementById(elId);
+  el.innerHTML = stack.map((item,i)=>`
+    ${i>0?'<span class="bc-sep">/</span>':''}
+    <span class="bc-item${i===stack.length-1?' active':''}" onclick="${navFn}(${i})">${item.name}</span>
+  `).join('');
+}
+
+function renderFiles(){
+  renderBreadcrumb(folderStack,'breadcrumb','navToIndex');
+  const sorted = sortItems(driveItems, sortKey, sortDir);
+  const area = document.getElementById('files-area');
+  if(!sorted.length){
+    area.innerHTML=`<div class="empty"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg><div class="empty-title">Cartella vuota</div><div class="empty-sub">Carica file o crea una nuova cartella</div></div>`;
+    return;
+  }
+  if(viewMode==='grid'){
+    area.innerHTML=`<div class="files-grid">${sorted.map(item=>mgCard(item)).join('')}</div>`;
+  } else {
+    area.innerHTML=`<div class="files-list">${sorted.map(item=>mgRow(item)).join('')}</div>`;
+  }
+}
+
+function mgCard(item){
+  const fc=getFileClass(item.mimeType,item.name);
+  const sel=selectedId===item.id?'selected':'';
+  return `<div class="file-card ${sel}" onclick="selectItem('${item.id}',event)" ondblclick="openItem('${item.id}')">
+    <div class="file-icon ${getIconClass(fc)}">${ICONS[fc]||ICONS.other}</div>
+    <div class="file-name" title="${item.name}">${item.name}</div>
+    <div class="file-meta">${fmtDate(item.modifiedTime)}</div>
+    ${item.size?`<div class="file-meta">${fmtSize(item.size)}</div>`:''}
+  </div>`;
+}
+
+function mgRow(item){
+  const fc=getFileClass(item.mimeType,item.name);
+  const sel=selectedId===item.id?'selected':'';
+  const isFolder=item.mimeType==='application/vnd.google-apps.folder';
+  const dls=!isFolder?`<div class="icon-btn" title="Scarica" onclick="downloadItem('${item.id}',event)"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg></div>`:'';
+  const del=`<div class="icon-btn" style="color:var(--red)" title="Elimina" onclick="deleteItem('${item.id}',event)"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/></svg></div>`;
+  return `<div class="file-row ${sel}" onclick="selectItem('${item.id}',event)" ondblclick="openItem('${item.id}')">
+    <div class="file-icon ${getIconClass(fc)}">${ICONS[fc]||ICONS.other}</div>
+    <div class="file-row-info">
+      <div class="file-row-name">${item.name}</div>
+      <div class="file-row-meta">${fmtDate(item.modifiedTime)}${item.size?' · '+fmtSize(item.size):''}</div>
+    </div>
+    <div class="row-actions">${dls}${del}</div>
+  </div>`;
+}
+
+function selectItem(id, e){
+  if(e) e.stopPropagation();
+  selectedId = selectedId===id ? null : id;
+  document.getElementById('delete-btn').classList.toggle('hidden', !selectedId);
+  showDetail(selectedId);
+  renderFiles();
+}
+
+function openItem(id){
+  const item = driveItems.find(i=>i.id===id);
+  if(!item) return;
+  if(item.mimeType==='application/vnd.google-apps.folder'){
+    currentFolderId = id;
+    folderStack.push({id, name:item.name});
+    selectedId = null;
+    hideDetail();
+    loadFolder('manager');
+  } else {
+    window.open(item.webViewLink,'_blank');
+  }
+}
+
+function navToIndex(i){
+  currentFolderId = folderStack[i].id;
+  folderStack = folderStack.slice(0,i+1);
+  selectedId = null; hideDetail();
+  loadFolder('manager');
+}
+
+function showDetail(id){
+  if(!id){ hideDetail(); return; }
+  const item = driveItems.find(i=>i.id===id);
+  if(!item){ hideDetail(); return; }
+  const fc = getFileClass(item.mimeType, item.name);
+  const isFolder = item.mimeType==='application/vnd.google-apps.folder';
+  const isPdf = item.mimeType==='application/pdf';
+  const panel = document.getElementById('detail-panel');
+  panel.classList.remove('hidden');
+  panel.innerHTML=`
+    <div class="dp-icon ${getIconClass(fc)}">${ICONS[fc]||ICONS.other}</div>
+    <div class="dp-name">${item.name}</div>
+    <div class="dp-prop"><div class="dp-label">Tipo</div><div class="dp-val">${isFolder?'Cartella':item.mimeType.split('/').pop().toUpperCase()}</div></div>
+    <div class="dp-prop"><div class="dp-label">Ultima modifica</div><div class="dp-val">${fmtDate(item.modifiedTime)}</div></div>
+    ${item.size?`<div class="dp-prop"><div class="dp-label">Dimensione</div><div class="dp-val">${fmtSize(item.size)}</div></div>`:''}
+    <div class="dp-actions">
+      ${!isFolder?`<button class="btn btn-primary" onclick="downloadItem('${id}')"><svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg> Scarica</button>`:''}
+      ${isPdf?`<button class="btn" onclick="printItem('${id}')"><svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a1 1 0 001 1h8a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a1 1 0 00-1-1H6a1 1 0 00-1 1zm2 0h6v3H7V4zm-1 9v-1h8v1H6zm9-4a1 1 0 110 2 1 1 0 010-2z"/></svg> Stampa</button>`:''}
+      <button class="btn" onclick="window.open('${item.webViewLink}','_blank')"><svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/></svg> Apri in Drive</button>
+      <button class="btn btn-danger" onclick="deleteItem('${id}')"><svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/></svg> Elimina</button>
+    </div>`;
+}
+function hideDetail(){
+  document.getElementById('detail-panel').classList.add('hidden');
+  document.getElementById('detail-panel').innerHTML='';
+}
+
+async function downloadItem(id, e){
+  if(e) e.stopPropagation();
+  const item = driveItems.find(i=>i.id===id);
+  if(!item) return;
+  showSyncing(true);
+  try{
+    const res = await driveReq(`files/${id}?alt=media`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=item.name; a.click();
+    URL.revokeObjectURL(url);
+    toast('Scaricamento avviato: '+item.name,'success');
+  }catch(err){ toast('Errore scaricamento','error'); }
+  finally{ showSyncing(false); }
+}
+
+async function printItem(id){
+  const item = driveItems.find(i=>i.id===id);
+  if(!item) return;
+  showSyncing(true);
+  try{
+    const res = await driveReq(`files/${id}?alt=media`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const w = window.open('');
+    w.document.write(`<iframe src="${url}" style="width:100%;height:100vh;border:none"></iframe>`);
+    w.document.close();
+    setTimeout(()=>{ w.print(); URL.revokeObjectURL(url); },800);
+  }catch(err){ toast('Errore stampa','error'); }
+  finally{ showSyncing(false); }
+}
+
+async function deleteItem(id, e){
+  if(e) e.stopPropagation();
+  const item = driveItems.find(i=>i.id===id);
+  if(!item) return;
+  if(!confirm(`Eliminare "${item.name}" da Google Drive?`)) return;
+  showSyncing(true);
+  try{
+    await deleteDriveItem(id);
+    driveItems = driveItems.filter(i=>i.id!==id);
+    if(selectedId===id){ selectedId=null; hideDetail(); document.getElementById('delete-btn').classList.add('hidden'); }
+    renderFiles();
+    toast(item.name+' eliminato','success');
+  }catch(err){ toast('Errore eliminazione','error'); }
+  finally{ showSyncing(false); }
+}
+
+async function deleteSelected(){
+  if(!selectedId) return;
+  await deleteItem(selectedId);
+}
+
+// ══════════════════════════════════════════
+//  SORT & VIEW MODE
+// ══════════════════════════════════════════
+function setSort(k){
+  if(sortKey===k) sortDir*=-1; else{ sortKey=k; sortDir=1; }
+  ['name','type','date'].forEach(x=>{
+    document.getElementById('sort-'+x).classList.toggle('active',x===k);
+    document.getElementById('sort-'+x+'-i').textContent=x===k?(sortDir===1?'↑':'↓'):'';
+  });
+  renderFiles();
+}
+function setViewMode(m){
+  viewMode=m;
+  document.getElementById('grid-btn').classList.toggle('active',m==='grid');
+  document.getElementById('list-btn').classList.toggle('active',m==='list');
+  renderFiles();
+}
+function setUserSort(k){
+  if(userSortKey===k) userSortDir*=-1; else{ userSortKey=k; userSortDir=1; }
+  ['name','type','date'].forEach(x=>{
+    document.getElementById('u-sort-'+x).classList.toggle('active',x===k);
+    document.getElementById('u-sort-'+x+'-i').textContent=x===k?(userSortDir===1?'↑':'↓'):'';
+  });
+  loadFolder('user');
+}
+function setUserViewMode(m){
+  userViewMode=m;
+  document.getElementById('u-grid-btn').classList.toggle('active',m==='grid');
+  document.getElementById('u-list-btn').classList.toggle('active',m==='list');
+  loadFolder('user');
+}
+
+// ══════════════════════════════════════════
+//  USER VIEW
+// ══════════════════════════════════════════
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='manager')||(i===1&&tab==='user')));
+  document.getElementById('manager-view').style.display = tab==='manager'?'flex':'none';
+  document.getElementById('user-view').classList.toggle('hidden', tab!=='user');
+  if(tab==='user'){
+    userFolderStack = [folderStack[0]];
+    loadFolder('user');
+  }
+}
+
+function renderUserFiles(items){
+  const sorted = sortItems(items, userSortKey, userSortDir);
+  renderBreadcrumb(userFolderStack,'user-breadcrumb','userNavToIndex');
+  const title = document.getElementById('user-folder-title');
+  const count = document.getElementById('user-folder-count');
+  title.textContent = userFolderStack[userFolderStack.length-1].name;
+  const fCount=items.filter(i=>i.mimeType==='application/vnd.google-apps.folder').length;
+  const fiCount=items.filter(i=>i.mimeType!=='application/vnd.google-apps.folder').length;
+  count.textContent=`${fCount} cartell${fCount===1?'a':'e'} · ${fiCount} file`;
+  const area=document.getElementById('user-files-area');
+  if(!sorted.length){
+    area.innerHTML=`<div class="empty"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg><div class="empty-title">Cartella vuota</div><div class="empty-sub">Nessun file disponibile</div></div>`;
+    return;
+  }
+  if(userViewMode==='grid'){
+    area.innerHTML=`<div class="files-grid">${sorted.map(item=>userCard(item)).join('')}</div>`;
+  } else {
+    area.innerHTML=`<div class="files-list">${sorted.map(item=>userRow(item)).join('')}</div>`;
+  }
+}
+
+function userCard(item){
+  const fc=getFileClass(item.mimeType,item.name);
+  const isFolder=item.mimeType==='application/vnd.google-apps.folder';
+  const isPdf=item.mimeType==='application/pdf';
+  const actions=isFolder?'':
+    `<div style="display:flex;gap:4px;margin-top:8px;">
+      <button class="btn btn-primary" style="flex:1;padding:5px 8px;font-size:11px;" onclick="userDownload('${item.id}','${item.name}',event)">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg>
+        Scarica
+      </button>
+      ${isPdf?`<button class="btn" style="padding:5px 8px;font-size:11px;" onclick="userPrint('${item.id}',event)" title="Stampa"><svg viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a1 1 0 001 1h8a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a1 1 0 00-1-1H6a1 1 0 00-1 1zm2 0h6v3H7V4zm-1 9v-1h8v1H6zm9-4a1 1 0 110 2 1 1 0 010-2z"/></svg></button>`:''}
+    </div>`;
+  return `<div class="file-card" onclick="userOpen('${item.id}','${item.mimeType.replace(/'/g,"\\'")}','${item.name.replace(/'/g,"\\'")}')">
+    <div class="file-icon ${getIconClass(fc)}">${ICONS[fc]||ICONS.other}</div>
+    <div class="file-name" title="${item.name}">${item.name}</div>
+    <div class="file-meta">${fmtDate(item.modifiedTime)}</div>
+    ${actions}
+  </div>`;
+}
+
+function userRow(item){
+  const fc=getFileClass(item.mimeType,item.name);
+  const isFolder=item.mimeType==='application/vnd.google-apps.folder';
+  const isPdf=item.mimeType==='application/pdf';
+  const acts=isFolder?'':
+    `<button class="btn btn-primary btn-sm" onclick="userDownload('${item.id}','${item.name}',event)">
+      <svg viewBox="0 0 20 20" fill="currentColor" style="width:13px;height:13px"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg>
+      Scarica</button>
+    ${isPdf?`<button class="btn btn-sm" onclick="userPrint('${item.id}',event)">Stampa</button>`:''}`;
+  return `<div class="file-row" onclick="userOpen('${item.id}','${item.mimeType.replace(/'/g,"\\'")}','${item.name.replace(/'/g,"\\'")}')">
+    <div class="file-icon ${getIconClass(fc)}">${ICONS[fc]||ICONS.other}</div>
+    <div class="file-row-info">
+      <div class="file-row-name">${item.name}</div>
+      <div class="file-row-meta">${fmtDate(item.modifiedTime)}${item.size?' · '+fmtSize(item.size):''}</div>
+    </div>
+    <div class="row-actions" style="opacity:1;">${acts}</div>
+  </div>`;
+}
+
+function userOpen(id, mime, name){
+  if(mime==='application/vnd.google-apps.folder'){
+    userFolderStack.push({id,name});
+    loadFolder('user');
+  } else {
+    userDownload(id, name);
+  }
+}
+function userNavToIndex(i){
+  userFolderStack = userFolderStack.slice(0,i+1);
+  loadFolder('user');
+}
+
+async function userDownload(id, name, e){
+  if(e) e.stopPropagation();
+  showSyncing(true);
+  try{
+    const res = await driveReq(`files/${id}?alt=media`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=name; a.click();
+    URL.revokeObjectURL(url);
+    toast('Scaricamento avviato','success');
+  }catch(err){ toast('Errore scaricamento','error'); }
+  finally{ showSyncing(false); }
+}
+
+async function userPrint(id, e){
+  if(e) e.stopPropagation();
+  showSyncing(true);
+  try{
+    const res = await driveReq(`files/${id}?alt=media`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const w=window.open('');
+    w.document.write(`<iframe src="${url}" style="width:100%;height:100vh;border:none"></iframe>`);
+    w.document.close();
+    setTimeout(()=>{ w.print(); URL.revokeObjectURL(url); },800);
+  }catch(err){ toast('Errore stampa','error'); }
+  finally{ showSyncing(false); }
+}
+
+// ══════════════════════════════════════════
+//  UPLOAD & CREATE FOLDER
+// ══════════════════════════════════════════
+function showUploadModal(){ document.getElementById('upload-modal').classList.remove('hidden'); }
+
+// ── USER UPLOAD ──
+let userPendingFiles = [];
+
+function showUserUploadModal(){
+  const folderName = userFolderStack[userFolderStack.length-1].name;
+  document.getElementById('user-upload-modal-sub').textContent =
+    `I file verranno caricati in "${folderName}" su Google Drive.`;
+  document.getElementById('user-upload-modal').classList.remove('hidden');
+}
+function handleUserDragOver(e){ e.preventDefault(); document.getElementById('user-drop-zone').classList.add('dragging'); }
+function handleUserDragLeave(){ document.getElementById('user-drop-zone').classList.remove('dragging'); }
+function handleUserDrop(e){ e.preventDefault(); document.getElementById('user-drop-zone').classList.remove('dragging'); addUserPendingFiles([...e.dataTransfer.files]); }
+function handleUserFileSelect(e){ addUserPendingFiles([...e.target.files]); document.getElementById('user-file-input').value=''; }
+function addUserPendingFiles(files){ userPendingFiles=[...userPendingFiles,...files]; renderUserPendingFiles(); }
+function renderUserPendingFiles(){
+  document.getElementById('user-upload-file-list').innerHTML=userPendingFiles.map((f,i)=>`
+    <div class="ufi">
+      <span>${f.name}</span>
+      <span style="margin-left:auto;margin-right:8px;color:var(--ink3)">${fmtSize(f.size)}</span>
+      <div class="rm" onclick="userPendingFiles.splice(${i},1);renderUserPendingFiles()"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></div>
+    </div>`).join('');
+}
+
+async function userUploadFiles(){
+  if(!userPendingFiles.length){ toast('Seleziona almeno un file','error'); return; }
+  const targetFolderId = userFolderStack[userFolderStack.length-1].id;
+  const prog = document.getElementById('user-upload-progress');
+  const progText = document.getElementById('user-progress-text');
+  const progFill = document.getElementById('user-progress-fill');
+  prog.style.display='block';
+  let done=0; const total=userPendingFiles.length;
+  for(const file of userPendingFiles){
+    progText.textContent=`Caricamento ${done+1}/${total}: ${file.name}`;
+    try{
+      await uploadToDrive(file, targetFolderId, p=>{
+        const pct=((done+p)/total*100).toFixed(0);
+        progFill.style.width=pct+'%';
+      });
+      done++;
+    }catch(err){ toast('Errore su '+file.name,'error'); }
+  }
+  prog.style.display='none'; progFill.style.width='0%';
+  userPendingFiles=[];
+  document.getElementById('user-upload-modal').classList.add('hidden');
+  renderUserPendingFiles();
+  await loadFolder('user');
+  // Also refresh manager if on same folder
+  if(currentFolderId === targetFolderId) await loadFolder('manager');
+  toast(`${done} file caricati su Drive`,'success');
+}
+function showNewFolderModal(){
+  document.getElementById('folder-modal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('folder-name-input').focus(),50);
+}
+function closeModal(id){
+  document.getElementById(id).classList.add('hidden');
+  if(id==='upload-modal'){pendingFiles=[];renderPendingFiles();}
+  if(id==='user-upload-modal'){userPendingFiles=[];renderUserPendingFiles();}
+}
+
+function handleDragOver(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('dragging'); }
+function handleDragLeave(){ document.getElementById('drop-zone').classList.remove('dragging'); }
+function handleDrop(e){ e.preventDefault(); document.getElementById('drop-zone').classList.remove('dragging'); addPendingFiles([...e.dataTransfer.files]); }
+function handleFileSelect(e){ addPendingFiles([...e.target.files]); }
+function addPendingFiles(files){ pendingFiles=[...pendingFiles,...files]; renderPendingFiles(); }
+function renderPendingFiles(){
+  document.getElementById('upload-file-list').innerHTML=pendingFiles.map((f,i)=>`
+    <div class="ufi">
+      <span>${f.name}</span>
+      <span style="margin-left:auto;margin-right:8px;color:var(--ink3)">${fmtSize(f.size)}</span>
+      <div class="rm" onclick="pendingFiles.splice(${i},1);renderPendingFiles()"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></div>
+    </div>`).join('');
+}
+
+async function uploadFiles(){
+  if(!pendingFiles.length){ toast('Seleziona almeno un file','error'); return; }
+  const prog = document.getElementById('upload-progress');
+  const progText = document.getElementById('progress-text');
+  const progFill = document.getElementById('progress-fill');
+  prog.style.display='block';
+  let done=0; const total=pendingFiles.length;
+  for(const file of pendingFiles){
+    progText.textContent=`Caricamento ${done+1}/${total}: ${file.name}`;
+    try{
+      await uploadToDrive(file, currentFolderId, p=>{
+        const pct=((done+p)/total*100).toFixed(0);
+        progFill.style.width=pct+'%';
+      });
+      done++;
+    }catch(err){ toast('Errore su '+file.name,'error'); }
+  }
+  prog.style.display='none'; progFill.style.width='0%';
+  closeModal('upload-modal');
+  await loadFolder('manager');
+  toast(`${done} file caricati su Drive`,'success');
+}
+
+async function createFolder(){
+  const name=document.getElementById('folder-name-input').value.trim();
+  if(!name){ toast('Inserisci un nome','error'); return; }
+  showSyncing(true);
+  try{
+    await createDriveFolder(name, currentFolderId);
+    closeModal('folder-modal');
+    await loadFolder('manager');
+    toast('Cartella creata: '+name,'success');
+  }catch(err){ toast('Errore creazione cartella','error'); }
+  finally{ showSyncing(false); }
+}
+
+// ══════════════════════════════════════════
+//  SHARE LINK & EMBED
+// ══════════════════════════════════════════
+function updateShareLink(){
+  const url = location.href.split('?')[0].split('#')[0];
+  document.getElementById('share-link-input').value = url;
+}
+function copyShareLink(){
+  navigator.clipboard.writeText(document.getElementById('share-link-input').value)
+    .then(()=>toast('Link copiato!','success')).catch(()=>toast('Impossibile copiare','error'));
+}
+function openEmbedModal(){
+  const url = document.getElementById('share-link-input').value;
+  document.getElementById('embed-code').value=`<iframe\n  src="${url}"\n  width="100%"\n  height="700"\n  frameborder="0"\n  style="border-radius:12px;border:1px solid #dddbd2;"\n  title="FileShare"></iframe>`;
+  document.getElementById('embed-modal').classList.remove('hidden');
+}
+function copyEmbed(){
+  navigator.clipboard.writeText(document.getElementById('embed-code').value)
+    .then(()=>toast('Codice embed copiato!','success'));
+}
+
+// ══════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════
+function showSyncing(v){ document.getElementById('sync-indicator').classList.toggle('hidden',!v); }
+
+function toast(msg, type='info'){
+  const icons={success:'<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>',error:'<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/></svg>',info:'<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/></svg>'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`${icons[type]||''}<span>${msg}</span>`;
+  document.getElementById('toast-area').appendChild(t);
+  setTimeout(()=>t.remove(),4000);
+}
+
+init();
+</script>
+</body>
+</html>
